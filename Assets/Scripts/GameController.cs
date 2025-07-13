@@ -10,16 +10,16 @@ public class GameController : MonoBehaviour
     public int rowNum = 7; // 宝石行数
     public int colNum = 10; // 宝石列数
 
-    private List<List<Gemstone>> _gemstoneList; // 定义列表
-    private List<Gemstone> _matchesGemstone;
+    private List<List<Gemstone>> _gemstoneGrid; // 所有宝石
+    private List<Gemstone> _matchesGemstones;   // 匹配的宝石
 
     private Gemstone _currGemstone; // 当前被选中的宝石
     
     
     private void Start()
     {
-        _gemstoneList = new(rowNum);
-        _matchesGemstone = new();
+        _gemstoneGrid = new(rowNum);
+        _matchesGemstones = new();
         for (int i = 0; i < rowNum; i++)
         {
             List<Gemstone> temp = new(colNum);
@@ -28,7 +28,7 @@ public class GameController : MonoBehaviour
                 Gemstone g = GenGemstone(i, j);
                 temp.Add(g);
             }
-            _gemstoneList.Add(temp);
+            _gemstoneGrid.Add(temp);
         }
     }
 
@@ -60,7 +60,7 @@ public class GameController : MonoBehaviour
     // 生成所对应行号和列号的宝石
     private void SetGemstone(int rowIdx, int colIdx, Gemstone g)
     {
-        _gemstoneList[rowIdx][colIdx] = g;
+        _gemstoneGrid[rowIdx][colIdx] = g;
     }
 
     // 交换宝石数据
@@ -81,6 +81,110 @@ public class GameController : MonoBehaviour
     {
         Exchange(curr, next);
         yield return new WaitForSeconds(0.5f);
-        Exchange(curr, next);
+        if(CheckHorizontalMatches() || CheckVerticalMatches()) 
+            RemoveMatches();
+        else
+            Exchange(curr, next);
+    }
+
+    private Gemstone GetGemstone(int rowIdx, int colIdx) => _gemstoneGrid[rowIdx][colIdx];
+
+    // 检测水平方向是否匹配
+    private bool CheckHorizontalMatches()
+    {
+        bool isMatches = false;
+        for (int i = 0; i < rowNum; i++)
+        {
+            for (int j = 0; j < colNum - 2; j++)
+            {
+                Gemstone gemstone1 = GetGemstone(i, j);
+                Gemstone gemstone2 = GetGemstone(i, j + 1);
+                Gemstone gemstone3 = GetGemstone(i, j + 2);
+                if (gemstone1.gemstoneType == gemstone2.gemstoneType && gemstone1.gemstoneType == gemstone3.gemstoneType)
+                {
+                    //print($"行：有匹配的宝石了 {i},{j}");
+                    AddMatches(gemstone1);
+                    AddMatches(gemstone2);
+                    AddMatches(gemstone3);
+                    isMatches = true;
+                }
+            }
+        }
+        return isMatches;
+    }
+
+    // 检测垂直方向是否匹配
+    private bool CheckVerticalMatches()
+    {
+        bool isMatches = false;
+        for (int i = 0; i < colNum; i++)
+        {
+            for (int j = 0; j < rowNum - 2; j++)
+            {
+                Gemstone gemstone1 = GetGemstone(j, i);
+                Gemstone gemstone2 = GetGemstone(j + 1, i);
+                Gemstone gemstone3 = GetGemstone(j + 2, i);
+                if (gemstone1.gemstoneType == gemstone2.gemstoneType && gemstone1.gemstoneType == gemstone3.gemstoneType)
+                {
+                    //print($"列：有匹配的宝石了 {j},{i}");
+                    AddMatches(gemstone1);
+                    AddMatches(gemstone2);
+                    AddMatches(gemstone3);
+                    isMatches = true;
+                }
+            }
+        }
+        return isMatches;
+    }
+
+    // 保存符合消除条件的宝石
+    private void AddMatches(Gemstone g)
+    {
+        if (_matchesGemstones == null)
+            _matchesGemstones = new();
+        int idx = _matchesGemstones.IndexOf(g);
+        if(idx == -1)
+            _matchesGemstones.Add(g);
+    }
+
+    // 删除/生成宝石
+    private void RemoveGemstone(Gemstone g)
+    {
+        g.Dispose();
+        // 删除宝石后生成新的宝石
+        for (int i = g.rowIdx + 1; i < rowNum; i++)
+        {
+            Gemstone tempGemstone = GetGemstone(i, g.colIdx);
+            tempGemstone.rowIdx--;
+            SetGemstone(tempGemstone.rowIdx, tempGemstone.colIdx, tempGemstone);
+            
+            tempGemstone.TweenToPosition(tempGemstone.rowIdx, tempGemstone.colIdx);
+        }
+
+        Gemstone newGemstone = GenGemstone(rowNum, g.colIdx);
+        newGemstone.rowIdx--;
+        SetGemstone(newGemstone.rowIdx, newGemstone.colIdx, newGemstone);
+        
+        newGemstone.TweenToPosition(newGemstone.rowIdx, newGemstone.colIdx);
+    }
+
+    // 删除所有匹配的宝石
+    private void RemoveMatches()
+    {
+        if (_matchesGemstones.Count == 0)
+            return;
+        
+        foreach (Gemstone matchGemstone in _matchesGemstones)
+            RemoveGemstone(matchGemstone);
+        
+        _matchesGemstones.Clear();
+        StartCoroutine(WaitForCheckMatchesAgain());
+    }
+
+    private IEnumerator WaitForCheckMatchesAgain()
+    {
+        yield return new WaitForSeconds(0.5f);
+        if(CheckHorizontalMatches() || CheckVerticalMatches())
+            RemoveMatches();
     }
 }

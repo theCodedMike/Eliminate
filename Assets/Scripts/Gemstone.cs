@@ -62,4 +62,11 @@ public class Gemstone : MonoBehaviour
         colIdx = idxOfCol;
         transform.DOMove(new Vector3(colIdx + xOffset, rowIdx + yOffset, 0), 0.5f);
     }
+
+    public void Dispose()
+    {
+        Destroy(gameObject);
+        Destroy(_gemstoneBg.gameObject);
+        _gameController = null;
+    }
 }

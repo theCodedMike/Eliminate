@@ -3,6 +3,7 @@ using UnityEngine;
 
 public class GameController : MonoBehaviour
 {
+    [Header("宝石预制体")]
     public Gemstone gemstone;
 
     public int rowNum = 7; // 宝石行数
@@ -11,7 +12,9 @@ public class GameController : MonoBehaviour
     private List<List<Gemstone>> _gemstoneList; // 定义列表
     private List<Gemstone> _matchesGemstone;
 
-
+    private Gemstone _currGemstone; // 当前被选中的宝石
+    
+    
     private void Start()
     {
         _gemstoneList = new(rowNum);
@@ -28,12 +31,25 @@ public class GameController : MonoBehaviour
         }
     }
 
-
     private Gemstone GenGemstone(int rowIdx, int colIdx)
     {
         Gemstone g = Instantiate(gemstone, transform, true);
         g.GetComponent<Gemstone>().RandomCreateGemstoneBg();
         g.GetComponent<Gemstone>().UpdatePosition(rowIdx, colIdx);
         return g;
+    }
+    
+    // 鼠标选中某块宝石
+    public void Select(Gemstone g)
+    {
+        if (_currGemstone == null)
+        {
+            _currGemstone = g;
+            _currGemstone.isSelected = true;
+            return;
+        }
+        
+        _currGemstone.isSelected = false;
+        _currGemstone = null;
     }
 }

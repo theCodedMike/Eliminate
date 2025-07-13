@@ -141,7 +141,7 @@ MonoBehaviour:
   yOffset: -2
   rowIdx: 0
   colIdx: 0
-  gemstones:
+  gemstoneBgs:
   - {fileID: 1292923451409860, guid: 168fcb6ee9a25f34b9e5883358dac26f, type: 3}
   - {fileID: 1149988476293056, guid: 4f3cae78809f38c4988301304333a63c, type: 3}
   - {fileID: 1899933998056738, guid: 3ea787aa4fbd945448ff5e5b78588380, type: 3}

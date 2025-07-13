@@ -1,4 +1,4 @@
-using UnityEngine;
+using UnityEngine; 
 using Random = UnityEngine.Random;
 
 public class Gemstone : MonoBehaviour
@@ -10,27 +10,32 @@ public class Gemstone : MonoBehaviour
 
     public int rowIdx;
     public int colIdx;
-
-    public GameObject[] gemstones;
+    public GameObject[] gemstoneBgs;
     // 宝石类型
     public int gemstoneType;
-
+    
     private GameObject _gemstoneBg;
-
     private SpriteRenderer _spriteRenderer;
-
-
+    private GameController _gameController;
+    
+    public bool isSelected
+    {
+        set => _spriteRenderer.color = value ? Color.red : Color.white;
+    }
+    
+    
     private void Start()
     {
-        _spriteRenderer = GetComponent<SpriteRenderer>();
+        _spriteRenderer = _gemstoneBg.GetComponent<SpriteRenderer>();
+        _gameController = FindFirstObjectByType<GameController>();
     }
 
     public void RandomCreateGemstoneBg()
     {
         if (_gemstoneBg)
             return;
-        gemstoneType = Random.Range(0, gemstones.Length);
-        _gemstoneBg = Instantiate(gemstones[gemstoneType], transform, true);
+        gemstoneType = Random.Range(0, gemstoneBgs.Length);
+        _gemstoneBg = Instantiate(gemstoneBgs[gemstoneType], transform, true);
     }
 
     public void UpdatePosition(int idxOfRow, int idxOfCol)
@@ -39,5 +44,10 @@ public class Gemstone : MonoBehaviour
         colIdx = idxOfCol;
         //控制生成宝石的位置
         transform.position = new Vector3(colIdx + xOffset, rowIdx + yOffset, 0);
+    }
+
+    private void OnMouseDown()
+    {
+        _gameController.Select(this);
     }
 }

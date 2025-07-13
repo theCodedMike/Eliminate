@@ -1,15 +1,19 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.UI;
 
 public class GameController : MonoBehaviour
 {
     [Header("宝石预制体")]
     public Gemstone gemstone;
-
+    [Header("行数")]
     public int rowNum = 7; // 宝石行数
+    [Header("列数")]
     public int colNum = 10; // 宝石列数
-
+    [Header("连击提示")]
+    public Text multiHit;
+    
     private List<List<Gemstone>> _gemstoneGrid; // 所有宝石
     private List<Gemstone> _matchesGemstones;   // 匹配的宝石
 
@@ -181,10 +185,16 @@ public class GameController : MonoBehaviour
         StartCoroutine(WaitForCheckMatchesAgain());
     }
 
+    // 连续检测匹配消除
     private IEnumerator WaitForCheckMatchesAgain()
     {
         yield return new WaitForSeconds(0.5f);
-        if(CheckHorizontalMatches() || CheckVerticalMatches())
+        if (CheckHorizontalMatches() || CheckVerticalMatches())
+        {
             RemoveMatches();
+            multiHit.text = "连击";
+            yield return new WaitForSeconds(3f);
+            multiHit.text = "";
+        }
     }
 }

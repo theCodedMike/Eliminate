@@ -1,3 +1,4 @@
+using DG.Tweening;
 using UnityEngine; 
 using Random = UnityEngine.Random;
 
@@ -30,6 +31,7 @@ public class Gemstone : MonoBehaviour
         _gameController = FindFirstObjectByType<GameController>();
     }
 
+    // 随机生成宝石背景
     public void RandomCreateGemstoneBg()
     {
         if (_gemstoneBg)
@@ -38,6 +40,7 @@ public class Gemstone : MonoBehaviour
         _gemstoneBg = Instantiate(gemstoneBgs[gemstoneType], transform, true);
     }
 
+    // 更新宝石的位置
     public void UpdatePosition(int idxOfRow, int idxOfCol)
     {
         rowIdx = idxOfRow;
@@ -46,8 +49,17 @@ public class Gemstone : MonoBehaviour
         transform.position = new Vector3(colIdx + xOffset, rowIdx + yOffset, 0);
     }
 
+    // 点击宝石
     private void OnMouseDown()
     {
         _gameController.Select(this);
+    }
+
+    // 使用DoTween实现宝石滑动效果
+    public void TweenToPosition(int idxOfRow, int idxOfCol)
+    {
+        rowIdx = idxOfRow;
+        colIdx = idxOfCol;
+        transform.DOMove(new Vector3(colIdx + xOffset, rowIdx + yOffset, 0), 0.5f);
     }
 }

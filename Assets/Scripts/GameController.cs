@@ -1,3 +1,4 @@
+using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
@@ -31,6 +32,7 @@ public class GameController : MonoBehaviour
         }
     }
 
+    // 生成宝石
     private Gemstone GenGemstone(int rowIdx, int colIdx)
     {
         Gemstone g = Instantiate(gemstone, transform, true);
@@ -48,8 +50,37 @@ public class GameController : MonoBehaviour
             _currGemstone.isSelected = true;
             return;
         }
-        
+
+        if (Mathf.Abs(_currGemstone.rowIdx - g.rowIdx) + Mathf.Abs(_currGemstone.colIdx - g.colIdx) == 1)
+            StartCoroutine(ExchangeAndMatches(_currGemstone, g));
         _currGemstone.isSelected = false;
         _currGemstone = null;
+    }
+
+    // 生成所对应行号和列号的宝石
+    private void SetGemstone(int rowIdx, int colIdx, Gemstone g)
+    {
+        _gemstoneList[rowIdx][colIdx] = g;
+    }
+
+    // 交换宝石数据
+    private void Exchange(Gemstone g1, Gemstone g2)
+    {
+        SetGemstone(g1.rowIdx, g1.colIdx, g2);
+        SetGemstone(g2.rowIdx, g2.colIdx, g1);
+        // 交换行号与列号
+        (g1.rowIdx, g2.rowIdx) = (g2.rowIdx, g1.rowIdx);
+        (g1.colIdx, g2.colIdx) = (g2.colIdx, g1.colIdx);
+        // 移动
+        g1.TweenToPosition(g1.rowIdx, g1.colIdx);
+        g2.TweenToPosition(g2.rowIdx, g2.colIdx);
+    }
+
+    // 交换宝石并检测匹配消除
+    private IEnumerator ExchangeAndMatches(Gemstone curr, Gemstone next)
+    {
+        Exchange(curr, next);
+        yield return new WaitForSeconds(0.5f);
+        Exchange(curr, next);
     }
 }
